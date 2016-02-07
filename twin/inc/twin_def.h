@@ -38,4 +38,6 @@
 #define STDC_HEADERS 1
 
 /* Define to 1 if the bytes are coded in memory in big endian format */
+#ifndef __BYTE_ORDER
 #define __BYTE_ORDER 0
+#endif

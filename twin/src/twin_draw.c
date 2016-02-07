@@ -6,7 +6,9 @@
 
 #include "twinint.h"
 
+#ifndef __BIG_ENDIAN
 #define __BIG_ENDIAN 1
+#endif
 
 /* op, src, dst */
 static twin_src_op  comp2[2][4][3] = {
