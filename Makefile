@@ -15,7 +15,8 @@ SIZE = $(CROSS_COMPILE)size
 # Files 
 ##########################################
 
-USER_SRCS = $(wildcard apps/*.c)
+APPS_SRCS = $(wildcard apps/*.c)
+BACKEND_SRCS = $(wildcard backend/*.c)
 STDLIB_SRCS = $(wildcard stdlib/src/*.c)
 STDIO_SRCS = $(wildcard stdio/*.c)
 STARTUP_SRCS = $(wildcard cmsis_boot/*.c)
@@ -23,7 +24,8 @@ SYSCALL_SRCS = $(wildcard syscalls/*.c)
 UGUI_SRCS = $(wildcard uGUI/*c)
 TWIN_SRCS = $(wildcard twin/src/*c)
 
-OBJS = $(USER_SRCS:.c=.o) \
+OBJS = $(APPS_SRCS:.c=.o) \
+		$(BACKEND_SRCS:.c=.o) \
 		$(STDLIB_SRCS:.c=.o) \
 		$(STDIO_SRCS:.c=.o) \
 		$(STARTUP_SRCS:.c=.o) \
@@ -34,6 +36,7 @@ OBJS = $(USER_SRCS:.c=.o) \
 INCLUDES = -Icmsis \
 			-Icmsis_boot \
 			-Iapps \
+			-Ibackend \
 			-Istdlib/inc \
 			-IuGUI \
 			-Itwin/inc
