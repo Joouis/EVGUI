@@ -22,5 +22,9 @@
 #include <stdlib.h>
 
 extern u32 ltdc_work_layer;
+extern volatile UG_U32 timer;
+extern volatile UG_U32 state;
+
+void backend_init();
 
 #endif
