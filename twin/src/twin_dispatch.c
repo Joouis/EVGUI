@@ -13,6 +13,7 @@ twin_dispatch (void)
     {
 	_twin_run_timeout ();
 	_twin_run_work ();
-	_twin_run_file (_twin_timeout_delay ());
+	/* TODO: There is no epoll.h for twin_file.c */
+	//_twin_run_file (_twin_timeout_delay ());
     }
 }

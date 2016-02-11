@@ -1,13 +1,9 @@
 #include "system.h"
 
+twin_time_t sys_timer = 0;
+
 /* GUI structure */
 UG_GUI gui;
-
-/* Touch structure */
-static TP_STATE* TP_State;
-
-/* FSM */
-#define STATE_MAIN_MENU                0
 
 /* Hardware accelerator for UG_DrawLine (Platform: STM32F4x9) */
 UG_RESULT _HW_DrawLine( UG_S16 x1, UG_S16 y1, UG_S16 x2, UG_S16 y2, UG_COLOR c )
@@ -88,46 +84,19 @@ UG_RESULT _HW_FillFrame( UG_S16 x1, UG_S16 y1, UG_S16 x2, UG_S16 y2, UG_COLOR c 
    return UG_RESULT_OK;
 }
 
+static void _twin_fbdev_put_span (twin_coord_t left,
+					twin_coord_t top,
+					twin_coord_t right,
+					twin_argb32_t *pixels,
+					void 		*closure)
+{
+	UG_DrawLine(left, top, right, top, *pixels);
+}
+
 /* Systick interrupt */
 void SysTick_Handler(void)
 {
-   if ( timer ) timer--;
-
-   if ( state == STATE_MAIN_MENU )
-   {
-      TP_State = IOE_TP_GetState();
-      if( TP_State->TouchDetected )
-      {
-         if ( (TP_State->X > 0) && (TP_State->X < 239 ) )
-         {
-            if ( (TP_State->Y > 0) && (TP_State->Y < 319 ) )
-            {
-               UG_TouchUpdate(TP_State->X,TP_State->Y,TOUCH_STATE_PRESSED);
-            }
-         }
-      }
-      else
-      {
-         UG_TouchUpdate(-1,-1,TOUCH_STATE_RELEASED);
-      }
-   }
-
-   UG_Update();
-}
-
-void led_init(void)
-{
-   GPIO_InitTypeDef GPIO_InitStructure;
-
-   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
-   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14;
-   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-   GPIO_Init(GPIOG, &GPIO_InitStructure);
-
-   GPIO_ToggleBits(GPIOG,GPIO_Pin_14);
+   sys_timer++;
 }
 
 void systick_init( void )
@@ -141,15 +110,13 @@ void systick_init( void )
    }
 }
 
-void backend_init()
+void backend_init(void)
 {
 	SystemInit();
 	delay_init();
 	sdram_init();
 	ltdc_init();
 	ili9341_init();
-   	led_init();
-
 
    /* Init µGUI */
    UG_Init(&gui,(void(*)(UG_S16,UG_S16,UG_COLOR))pset,240,320);
@@ -157,13 +124,79 @@ void backend_init()
    /* Init Touch */
    IOE_Config();
 
+   /* Init SysTick (100Hz) */
+   systick_init();
+   
    /* Register hardware acceleration */
    UG_DriverRegister( DRIVER_DRAW_LINE, (void*)_HW_DrawLine );
    UG_DriverRegister( DRIVER_FILL_FRAME, (void*)_HW_FillFrame );
    UG_DriverEnable( DRIVER_DRAW_LINE );
    UG_DriverEnable( DRIVER_FILL_FRAME );
 
-   /* Init SysTick (100Hz) */
-   systick_init();
-
+   /* Clear screen */
+   ltdc_draw_layer(LAYER_1);
+   ltdc_show_layer(LAYER_1);
+   UG_FillScreen( C_BLUE );
 }
+
+static twin_bool_t twin_fbdev_init_screen(twin_fbdev_t *tf)
+{
+	twin_put_span_t span;
+
+	span = _twin_fbdev_put_span;
+
+	tf->xres = WIDTH;
+	tf->yres = HEIGHT;
+	tf->screen = twin_screen_create(tf->xres,
+					tf->yres,
+					NULL, span, tf);
+	if ( tf->screen == NULL  ) {
+		return 0;
+	}
+	return 1;
+}
+
+static twin_bool_t twin_fbdev_work(void *closure)
+{
+	twin_fbdev_t *tf = closure;
+	
+	if ( tf->screen ) {
+		twin_screen_update(tf->screen);
+	}
+
+	return TWIN_TRUE;
+}
+
+twin_fbdev_t *twin_fbdev_create(void){
+	backend_init();
+	
+	twin_fbdev_t *tf;
+	tf = calloc(1, sizeof(twin_fbdev_t));
+	if ( tf == NULL ) {
+		return NULL;
+	}
+	if ( !twin_fbdev_init_screen(tf) ) {
+		return NULL;
+	}
+
+	twin_set_work(twin_fbdev_work, TWIN_WORK_REDISPLAY, tf);
+
+	return tf;
+}
+
+twin_bool_t twin_fbdev_activate(twin_fbdev_t *tf)
+{
+	/* Run work to process the VT switch */
+	twin_fbdev_work(tf);
+
+	/* If the screen is not active, then we failed
+	 * the fbdev configuration
+	 */
+	return 1;
+}
+
+
+
+
+
+

@@ -96,13 +96,11 @@ _twin_timeout_delay (void)
     return -1;
 }
 
-#include <sys/time.h>
-#include <time.h>
+// Use internal systic counter to record the time
+extern twin_time_t sys_timer;
 
 twin_time_t
 twin_now (void)
 {
-    struct timeval  tv;
-    gettimeofday (&tv, NULL);
-    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+    return sys_timer;
 }
