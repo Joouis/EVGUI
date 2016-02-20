@@ -223,9 +223,9 @@ twin_screen_update (twin_screen_t *screen)
 		twin_screen_span_pixmap(screen, span, p, y, left, right,
 					pop16, pop32);
 
-	    /* if (screen->cursor) */
-		/* twin_screen_span_pixmap(screen, span, screen->cursor, */
-		/* 			y, left, right, pop16, pop32); */
+	    if (screen->cursor)
+		twin_screen_span_pixmap(screen, span, screen->cursor,
+					y, left, right, pop16, pop32);
 
 	    (*screen->put_span) (left, y, right, span, screen->closure);
 	}
@@ -272,57 +272,57 @@ twin_screen_get_background (twin_screen_t *screen)
     return screen->background;
 }
 
-/* static void */
-/* twin_screen_damage_cursor(twin_screen_t *screen) */
-/* { */
-/*     twin_screen_damage (screen, */
-/* 			screen->cursor->x, */
-/* 			screen->cursor->y, */
-/* 			screen->cursor->x + screen->cursor->width, */
-/* 			screen->cursor->y + screen->cursor->height); */
-/* } */
+static void
+twin_screen_damage_cursor(twin_screen_t *screen)
+{
+    twin_screen_damage (screen,
+			screen->cursor->x,
+			screen->cursor->y,
+			screen->cursor->x + screen->cursor->width,
+			screen->cursor->y + screen->cursor->height);
+}
 
-/* void */
-/* twin_screen_set_cursor (twin_screen_t *screen, twin_pixmap_t *pixmap, */
-/* 			twin_fixed_t hotspot_x, twin_fixed_t hotspot_y) */
-/* { */
-/*     twin_screen_disable_update(screen); */
-/*  */
-/*     if (screen->cursor) */
-/* 	twin_screen_damage_cursor(screen); */
-/*  */
-/*     screen->cursor = pixmap; */
-/*     screen->curs_hx = hotspot_x; */
-/*     screen->curs_hy = hotspot_y; */
-/*     if (pixmap) { */
-/* 	    pixmap->x = screen->curs_x - hotspot_x; */
-/* 	    pixmap->y = screen->curs_y - hotspot_y; */
-/* 	    twin_screen_damage_cursor(screen); */
-/*     } */
-/*  */
-/*     twin_screen_enable_update(screen); */
-/* } */
+void
+twin_screen_set_cursor (twin_screen_t *screen, twin_pixmap_t *pixmap,
+			twin_fixed_t hotspot_x, twin_fixed_t hotspot_y)
+{
+    twin_screen_disable_update(screen);
 
-/* static void */
-/* twin_screen_update_cursor(twin_screen_t *screen, */
-/* 			  twin_coord_t x, twin_coord_t y) */
-/* { */
-/*     twin_screen_disable_update(screen); */
-/*  */
-/*     if (screen->cursor) */
-/* 	twin_screen_damage_cursor(screen); */
-/*  */
-/*     screen->curs_x = x; */
-/*     screen->curs_y = y; */
-/*  */
-/*     if (screen->cursor) { */
-/* 	screen->cursor->x = screen->curs_x - screen->curs_hx; */
-/* 	screen->cursor->y = screen->curs_y - screen->curs_hy; */
-/* 	twin_screen_damage_cursor(screen); */
-/*     } */
-/*  */
-/*     twin_screen_enable_update(screen); */
-/* } */
+    if (screen->cursor)
+	twin_screen_damage_cursor(screen);
+
+    screen->cursor = pixmap;
+    screen->curs_hx = hotspot_x;
+    screen->curs_hy = hotspot_y;
+    if (pixmap) {
+	    pixmap->x = screen->curs_x - hotspot_x;
+	    pixmap->y = screen->curs_y - hotspot_y;
+	    twin_screen_damage_cursor(screen);
+    }
+
+    twin_screen_enable_update(screen);
+}
+
+static void
+twin_screen_update_cursor(twin_screen_t *screen,
+			  twin_coord_t x, twin_coord_t y)
+{
+    twin_screen_disable_update(screen);
+
+    if (screen->cursor)
+	twin_screen_damage_cursor(screen);
+
+    screen->curs_x = x;
+    screen->curs_y = y;
+
+    if (screen->cursor) {
+	screen->cursor->x = screen->curs_x - screen->curs_hx;
+	screen->cursor->y = screen->curs_y - screen->curs_hy;
+	twin_screen_damage_cursor(screen);
+    }
+
+    twin_screen_enable_update(screen);
+}
 
 static void _twin_adj_mouse_evt(twin_event_t *event, twin_pixmap_t *pixmap)
 {
@@ -342,9 +342,9 @@ twin_bool_t twin_screen_dispatch (twin_screen_t *screen,
     case TwinEventMotion:
     case TwinEventButtonDown:
     case TwinEventButtonUp:
-	/* #<{(| update mouse cursor |)}># */
-    /*     twin_screen_update_cursor(screen, event->u.pointer.screen_x, */
-	/* 			  event->u.pointer.screen_y); */
+	/* update mouse cursor */
+        twin_screen_update_cursor(screen, event->u.pointer.screen_x,
+				  event->u.pointer.screen_y);
 
 	/* if target is tracking the mouse, check for mouse up, if not,
 	 * just pass the event along

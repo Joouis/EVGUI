@@ -90,7 +90,9 @@ static void _twin_fbdev_put_span (twin_coord_t left,
 					twin_argb32_t *pixels,
 					void 		*closure)
 {
-	UG_DrawLine(left, top, right, top, *pixels);
+	twin_coord_t width = right - left;
+	while(width--)
+		UG_DrawPixel((left++), top, *(pixels++));
 }
 
 /* Systick interrupt */
@@ -160,12 +162,31 @@ static twin_bool_t twin_fbdev_work(void *closure)
 {
 	twin_fbdev_t *tf = closure;
 	
-	if ( tf->screen ) {
+#ifndef _IMMEDIATE_REFRESH
+	if ( tf->screen && twin_screen_damaged(tf->screen)) {
 		twin_screen_update(tf->screen);
 	}
+#endif
 
 	return TWIN_TRUE;
 }
+
+#ifdef _IMMEDIATE_REFRESH
+static void twin_fbdev_damaged(void *closure)
+{
+    twin_fbdev_t *tf = closure;
+
+#if 0
+    DEBUG("fbdev damaged %d,%d,%d,%d, active=%d\n",
+			tf->screen->damage.left, tf->screen->damage.top,
+			tf->screen->damage.right, tf->screen->damage.bottom,
+			tf->active);
+#endif
+
+    if (tf->active && twin_screen_damaged (tf->screen))
+		twin_screen_update(tf->screen);
+}
+#endif /* _IMMEDIATE_REFRESH */
 
 twin_fbdev_t *twin_fbdev_create(void){
 	backend_init();
@@ -180,6 +201,10 @@ twin_fbdev_t *twin_fbdev_create(void){
 	}
 
 	twin_set_work(twin_fbdev_work, TWIN_WORK_REDISPLAY, tf);
+
+#ifdef _IMMEDIATE_REFRESH
+	twin_screen_register_damaged(tf->screen, twin_fbdev_damaged, tf);
+#endif
 
 	return tf;
 }

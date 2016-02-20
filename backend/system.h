@@ -22,6 +22,7 @@
 #include "stm32f429i_discovery_ioe.h"
 #include "stm32f429i_discovery.h"
 #include "twin.h"
+#include "twinint.h"
 
 #define WIDTH	240
 #define HEIGHT	320

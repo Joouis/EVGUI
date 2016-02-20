@@ -218,14 +218,14 @@ struct _twin_screen {
     twin_pixmap_t	*target;
     twin_bool_t		clicklock;
 
-    // #<{(|
-    //  * mouse image (optional)
-    //  |)}>#
-    // twin_pixmap_t	*cursor;
-    // twin_coord_t	curs_hx;
-    // twin_coord_t	curs_hy;
-    // twin_coord_t	curs_x;
-    // twin_coord_t	curs_y;
+    /*
+     * mouse image (optional)
+     */
+    twin_pixmap_t	*cursor;
+    twin_coord_t	curs_hx;
+    twin_coord_t	curs_hy;
+    twin_coord_t	curs_x;
+    twin_coord_t	curs_y;
 
     /*
      * Output size
@@ -1063,9 +1063,9 @@ twin_screen_set_background (twin_screen_t *screen, twin_pixmap_t *pixmap);
 twin_pixmap_t *
 twin_screen_get_background (twin_screen_t *screen);
 
-// void
-// twin_screen_set_cursor (twin_screen_t *screen, twin_pixmap_t *pixmap,
-// 			twin_fixed_t hotspot_x, twin_fixed_t hotspot_y);
+void
+twin_screen_set_cursor (twin_screen_t *screen, twin_pixmap_t *pixmap,
+			twin_fixed_t hotspot_x, twin_fixed_t hotspot_y);
 
 twin_bool_t
 twin_screen_dispatch (twin_screen_t *screen,
