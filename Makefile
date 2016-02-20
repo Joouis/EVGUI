@@ -85,6 +85,8 @@ flash: $(PROJ_NAME.bin)
 		-c $(OPENOCD_INS) \
 		-c "reset run" -c shutdown 
 
+debug: $(PROJ_NAME).elf
+	arm-none-eabi-gdb -x "gdb.script"
 
 clean:
 	rm -f $(OBJS)

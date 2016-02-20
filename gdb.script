@@ -1,0 +1,4 @@
+target remote:4242
+file stm32f429-example.elf
+b main.c:41
+layout src
