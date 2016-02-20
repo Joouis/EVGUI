@@ -1,2 +1,7 @@
 *.un~
+*.o
+*.bin
+*.elf
+*.map
+core
 tags
