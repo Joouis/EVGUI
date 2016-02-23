@@ -31,7 +31,7 @@ twin_pixmap_create (twin_format_t   format,
     pixmap->origin_x = pixmap->origin_y = 0;
     pixmap->stride = stride;
     pixmap->disable = 0;
-    pixmap->p.v = pixmap + 1;
+    pixmap->p.v = malloc(space);//pixmap + 1;
     memset (pixmap->p.v, '\0', space);
     return pixmap;
 }
@@ -69,7 +69,13 @@ twin_pixmap_destroy (twin_pixmap_t *pixmap)
 {
     if (pixmap->screen)
 	twin_pixmap_hide (pixmap);
-    free (pixmap);
+    //free (pixmap);
+	if (pixmap && pixmap->p.v) {
+		free(pixmap->p.v);
+		free(pixmap);
+	}else{
+		free(pixmap);
+	}
 }
 
 void
