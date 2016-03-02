@@ -9,6 +9,7 @@
 
 #include "twin.h"
 #include "twin_def.h"
+#include "malloc.h"
 #include <string.h>
 
 #define maybe_unused __attribute__((unused))
