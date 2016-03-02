@@ -56,7 +56,7 @@ endef
 LDFLAGS += -L $(call get_library_path,libc.a)
 LDFLAGS += -L $(call get_library_path,libgcc.a) 
 LDFLAGS += $(MCU) -g2 -nostartfiles \
-	-Wl,-Map=$(PROJ_NAME).map -O0 -Wl,--gc-sections -Tld/stm32f4.ld
+	-Wl,-Map=$(PROJ_NAME).map -O3 -Wl,--gc-sections -Tld/stm32f429zi_flash.ld
 
 ##########################################
 # Targets
@@ -93,7 +93,9 @@ flash: $(PROJ_NAME.bin)
 		-c "reset run" -c shutdown 
 
 debug: $(PROJ_NAME).elf
-	arm-none-eabi-gdb -x "gdb.script"
+	# arm-none-eabi-gdb -x "gdb.script"
+	# Use CGDB
+	cgdb -d arm-none-eabi-gdb -x "gdb.script"
 
 clean:
 	rm -f $(OBJS)
