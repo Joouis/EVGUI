@@ -14,7 +14,7 @@ twin_pixmap_create (twin_format_t   format,
     twin_coord_t    stride = twin_bytes_per_pixel (format) * width;
     twin_area_t	    space = (twin_area_t) stride * height;
     twin_area_t	    size = sizeof (twin_pixmap_t) + space;
-    twin_pixmap_t   *pixmap = malloc (size);
+    twin_pixmap_t   *pixmap = sram_malloc (size);
     if (!pixmap)
 	return 0;
     pixmap->screen = 0;
@@ -31,7 +31,7 @@ twin_pixmap_create (twin_format_t   format,
     pixmap->origin_x = pixmap->origin_y = 0;
     pixmap->stride = stride;
     pixmap->disable = 0;
-    pixmap->p.v = malloc(space);//pixmap + 1;
+    pixmap->p.v = sram_malloc(space);//pixmap + 1;
     memset (pixmap->p.v, '\0', space);
     return pixmap;
 }
@@ -43,7 +43,7 @@ twin_pixmap_create_const (twin_format_t	    format,
 			  twin_coord_t	    stride,
 			  twin_pointer_t    pixels)
 {
-    twin_pixmap_t   *pixmap = malloc (sizeof (twin_pixmap_t));
+    twin_pixmap_t   *pixmap = sram_malloc (sizeof (twin_pixmap_t));
     if (!pixmap)
 	return 0;
     pixmap->screen = 0;
@@ -69,12 +69,12 @@ twin_pixmap_destroy (twin_pixmap_t *pixmap)
 {
     if (pixmap->screen)
 	twin_pixmap_hide (pixmap);
-    //free (pixmap);
+    /* sram_free (pixmap); */
 	if (pixmap && pixmap->p.v) {
-		free(pixmap->p.v);
-		free(pixmap);
+		sram_free(pixmap->p.v);
+		sram_free(pixmap);
 	}else{
-		free(pixmap);
+		sram_free(pixmap);
 	}
 }
 

@@ -56,9 +56,12 @@ int main(void)
 #if 0
 	twin_calc_start(tf->screen, "Calculator", 0, 0, 60*3/2, 120*3/2);
 #endif
-/* #if 1 */
-     twin_text_start (tf->screen,  "Gettysburg Address", 0, 0, 50, 50);
-/* #endif */
+#if 0
+    twin_text_start (tf->screen,  "Gettysburg Address", 0, 0, 240, 320);
+#endif
+#if 1
+    twin_clock_start (tf->screen, "Clock", 0, 0, 240, 320);
+#endif
 
 	twin_fbdev_activate(tf);
 
