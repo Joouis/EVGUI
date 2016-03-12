@@ -15,8 +15,6 @@
 #define MALLOC_ADDR_START	(SDRAM_BANK_ADDR + 0x50000)
 #define HEAP_SIZE (2 * 1024 * 1024)
 
-/* char heap[HEAP_SIZE] = {0}; */
-/* static unsigned char *heap = (unsigned char *) MALLOC_ADDR_START; */
 extern struct alloc_algo thin_algo;
 
 static struct heap_info _info = {
@@ -51,31 +49,3 @@ void sram_free(void *ptr)
     }
     _info.algo->free(ptr);
 }
-
-/* void print_free_list() */
-/* { */
-/*     if (!_info.initialized) { */
-/*         init_heap(); */
-/*     } */
-/*     _info.algo->print_free_list(); */
-/* } */
-
-/* int main(int argc, char *argv[]) */
-/* { */
-/*     struct block *tmp = (struct block *) heap; */
-/*     int *p, *q, *r; */
-/*     print_free_list(); */
-/*     p = malloc(sizeof(*p)); */
-/*     print_free_list(); */
-/*     q = malloc(sizeof(*q)); */
-/*     print_free_list(); */
-/*     r = malloc(sizeof(*r)); */
-/*     print_free_list(); */
-/*     free(q); */
-/*     print_free_list(); */
-/*     free(p); */
-/*     print_free_list(); */
-/*     free(r); */
-/*     print_free_list(); */
-/*     return 0; */
-/* } */
