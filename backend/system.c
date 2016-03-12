@@ -103,9 +103,9 @@ void SysTick_Handler(void)
 
 void systick_init( void )
 {
-   /* Init SysTick (100Hz) */
+   /* Init SysTick (1000Hz) */
    SystemCoreClockUpdate();
-   if (SysTick_Config(SystemCoreClock / 100))
+   if (SysTick_Config(SystemCoreClock / 1000))
    {
       /* Capture error */
       while (1);
