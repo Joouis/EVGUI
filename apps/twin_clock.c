@@ -4,26 +4,11 @@
  * All rights reserved.
  */
 
-#include <twin_clock.h>
-#include <twinint.h>
+#include "twin_clock.h"
+#include "twinint.h"
 #include <stdio.h>
 /* #include <sys/time.h> */
 /* #include <time.h> */
-struct timeval {
-               time_t      tv_sec;     /* seconds */
-               suseconds_t tv_usec;    /* microseconds */
-           };
-struct tm {
-               int tm_sec;    /* Seconds (0-60) */
-               int tm_min;    /* Minutes (0-59) */
-               int tm_hour;   /* Hours (0-23) */
-               int tm_mday;   /* Day of the month (1-31) */
-               int tm_mon;    /* Month (0-11) */
-               int tm_year;   /* Year - 1900 */
-               int tm_wday;   /* Day of the week (0-6, Sunday = 0) */
-               int tm_yday;   /* Day in the year (0-365, 1 Jan = 0) */
-               int tm_isdst;  /* Daylight saving time */
-           };
 
 #define D(x) twin_double_to_fixed(x)
 
@@ -178,37 +163,30 @@ _twin_clock_face (twin_clock_t *clock)
     twin_path_destroy (path);
 }
 
+// Use internal systic counter to record the time
+extern struct timeval tv;
+extern struct tm t;
+
 static twin_time_t
 _twin_clock_interval (void)
 {
-    struct timeval  tv;
+    /* struct timeval  tv; */
     /* gettimeofday (&tv, NULL); */
-	static unsigned long i = 0;
-	//tv.tv_sec = i++;
-	//tv.tv_usec = 10000 + i ;
-	i++;
-	if (i > 1000)
-		i = 0;
-    return 1000 - i; //(tv.tv_usec / 1000);
+	
+    return 1000 - tv.tv_msec;
 }
 
 void
 _twin_clock_paint (twin_clock_t *clock)
 {
-    struct timeval  tv;
     twin_angle_t    second_angle, minute_angle, hour_angle;
-    struct tm	    t;
     
     /* gettimeofday (&tv, NULL); */
-	static unsigned long i = 0;
-	tv.tv_sec = i++;
-	tv.tv_usec = 10000 + i;
-
     /* localtime_r(&tv.tv_sec, &t); */
 
     _twin_clock_face (clock);
 
-    second_angle = ((t.tm_sec * 100 + tv.tv_usec / 10000) * 
+    second_angle = ((t.tm_sec * 100 + tv.tv_msec / 10000) *
 		    TWIN_ANGLE_360) / 6000;
     minute_angle = twin_clock_minute_angle (t.tm_min) + second_angle / 60;
     hour_angle = (t.tm_hour * TWIN_ANGLE_360 + minute_angle) / 12;

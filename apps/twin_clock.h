@@ -8,6 +8,7 @@
 #define _TWIN_CLOCK_H_
 
 #include <twin.h>
+#include "system.h"
 
 typedef struct _twin_clock {
     twin_widget_t   widget;

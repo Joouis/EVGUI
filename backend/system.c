@@ -1,6 +1,21 @@
 #include "system.h"
 
-twin_time_t sys_timer = 0;
+struct timeval tv = {
+	.tv_sec = 0,
+	.tv_msec = 0,
+};
+
+struct tm t = {
+	.tm_sec = 30,
+	.tm_min = 15,
+	.tm_hour = 0,
+	.tm_mday = 20,
+	.tm_mon = 3,
+	.tm_year = 2016,
+	.tm_wday = 0,
+	.tm_yday = 79,
+	.tm_isdst = 0,
+};
 
 /* GUI structure */
 UG_GUI gui;
@@ -98,7 +113,17 @@ static void _twin_fbdev_put_span (twin_coord_t left,
 /* Systick interrupt */
 void SysTick_Handler(void)
 {
-   sys_timer++;
+   tv.tv_msec++;
+   /* TODO: min, hour, mon, year, ...  */
+   if ( tv.tv_msec > 1000  ) {
+	   tv.tv_msec = 0;
+	   tv.tv_sec++;
+	   t.tm_sec++;
+	   if ( t.tm_sec == 60 ) {
+		   t.tm_sec = 0;
+		   t.tm_min++;
+	   }
+   }
 }
 
 void systick_init( void )

@@ -97,10 +97,11 @@ _twin_timeout_delay (void)
 }
 
 // Use internal systic counter to record the time
-extern twin_time_t sys_timer;
+extern struct timeval tv;
+extern struct tm t;
 
 twin_time_t
 twin_now (void)
 {
-    return sys_timer;
+    return tv.tv_sec * 1000 + tv.tv_msec;
 }
