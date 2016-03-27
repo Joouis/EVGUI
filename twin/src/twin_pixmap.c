@@ -13,8 +13,7 @@ twin_pixmap_create (twin_format_t   format,
 {
     twin_coord_t    stride = twin_bytes_per_pixel (format) * width;
     twin_area_t	    space = (twin_area_t) stride * height;
-    twin_area_t	    size = sizeof (twin_pixmap_t) + space;
-    twin_pixmap_t   *pixmap = sram_malloc (size);
+    twin_pixmap_t   *pixmap = sram_malloc (sizeof(twin_pixmap_t));
     if (!pixmap)
 	return 0;
     pixmap->screen = 0;
@@ -31,7 +30,7 @@ twin_pixmap_create (twin_format_t   format,
     pixmap->origin_x = pixmap->origin_y = 0;
     pixmap->stride = stride;
     pixmap->disable = 0;
-    pixmap->p.v = sram_malloc(space);//pixmap + 1;
+    pixmap->p.v = sram_malloc(space);
     memset (pixmap->p.v, '\0', space);
     return pixmap;
 }
