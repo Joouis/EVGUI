@@ -23,6 +23,7 @@ STARTUP_SRCS = $(wildcard cmsis_boot/*.c)
 SYSCALL_SRCS = $(wildcard syscalls/*.c)
 UGUI_SRCS = $(wildcard uGUI/*c)
 TWIN_SRCS = $(wildcard twin/src/*c)
+LIBSVGTINY_SRCS = $(wildcard libsvgtiny/src/*c)
 
 OBJS = $(APPS_SRCS:.c=.o) \
 		$(BACKEND_SRCS:.c=.o) \
@@ -31,7 +32,8 @@ OBJS = $(APPS_SRCS:.c=.o) \
 		$(STARTUP_SRCS:.c=.o) \
 		$(SYSCALL_SRCS:.c=.o) \
 		$(UGUI_SRCS:.c=.o) \
-		$(TWIN_SRCS:.c=.o)
+		$(TWIN_SRCS:.c=.o) \
+		$(LIBSVGTINY_SRCS:.c=.o)
 
 INCLUDES = -Icmsis \
 			-Icmsis_boot \
@@ -40,7 +42,10 @@ INCLUDES = -Icmsis \
 			-Istdlib/inc \
 			-Isyscalls \
 			-IuGUI \
-			-Itwin/inc
+			-Itwin/inc \
+			-Ilibsvgtiny/inc \
+			-Ilibsvgtiny/src \
+			-I/usr/include/libxml2
 ##########################################
 # Flag Settings 
 ##########################################
@@ -49,13 +54,13 @@ MCU = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mtune=cortex-m4
 FPU = -mfpu=fpv4-sp-d16 -mfloat-abi=hard -D__FPU_USED
 DEFINES = -DSTM32F4XX -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER -D__ASSEMBLY__
 
-CFLAGS = -std=gnu99 $(MCU) $(FPU) $(DEFINES) $(INCLUDES) -g2 -Wall -O0 -c
+CFLAGS = -std=gnu99 $(MCU) $(FPU) $(DEFINES) $(INCLUDES) -g2 -Wall -O0 -c -lxml2 -lm
 LDFLAGS =
 define get_library_path
     $(shell dirname $(shell $(CC) $(CFLAGS) -print-file-name=$(1)))
 endef
 LDFLAGS += -L $(call get_library_path,libc.a)
-LDFLAGS += -L $(call get_library_path,libgcc.a) 
+LDFLAGS += -L $(call get_library_path,libgcc.a)
 LDFLAGS += $(MCU) -g2 -nostartfiles \
 	-Wl,-Map=$(PROJ_NAME).map -O3 -Wl,--gc-sections -Tld/stm32f429zi_flash.ld
 

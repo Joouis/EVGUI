@@ -1,5 +1,6 @@
 #include "twin_calc.h"
 #include "twin_text.h"
+#include "twin_svg.h"
 #include "system.h"
 
 twin_fbdev_t *tf;
@@ -41,8 +42,8 @@ static twin_pixmap_t *twin_get_default_cursor(int *hx, int *hy)
 
 int main(void)
 {
-	int hx, hy;
-	twin_pixmap_t *cur;
+	/* int hx, hy; */
+	/* twin_pixmap_t *cur; */
 
 	tf = twin_fbdev_create();
 	if ( tf == NULL ) {
@@ -59,8 +60,11 @@ int main(void)
 #if 0
     twin_text_start (tf->screen,  "Gettysburg Address", 0, 0, 240, 320);
 #endif
-#if 1
+#if 0
     twin_clock_start (tf->screen, "Clock", 0, 0, 240, 320);
+#endif
+#if 1
+	twin_svg_start (tf->screen, "screen", 0, 0, 240, 320);
 #endif
 
 	twin_fbdev_activate(tf);
