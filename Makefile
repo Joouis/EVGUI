@@ -41,20 +41,20 @@ INCLUDES = -Icmsis \
 			-Ibackend \
 			-Istdlib/inc \
 			-Isyscalls \
+			-Istdio \
 			-IuGUI \
 			-Itwin/inc \
 			-Ilibsvgtiny/inc \
-			-Ilibsvgtiny/src \
-			-I/usr/include/libxml2
+			-Ilibsvgtiny/src
 ##########################################
 # Flag Settings 
 ##########################################
 
 MCU = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mtune=cortex-m4
-FPU = -mfpu=fpv4-sp-d16 -mfloat-abi=hard -D__FPU_USED
-DEFINES = -DSTM32F4XX -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER -D__ASSEMBLY__
+FPU = -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+DEFINES = -DSTM32F4XX -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER -D__ASSEMBLY__ -D__FPU_USED -DEZXML_NOMMAP
 
-CFLAGS = -std=gnu99 $(MCU) $(FPU) $(DEFINES) $(INCLUDES) -g2 -Wall -O0 -c -lxml2 -lm
+CFLAGS = -std=gnu99 $(MCU) $(FPU) $(DEFINES) $(INCLUDES) -g2 -Wall -O0 -c -lm
 LDFLAGS =
 define get_library_path
     $(shell dirname $(shell $(CC) $(CFLAGS) -print-file-name=$(1)))
