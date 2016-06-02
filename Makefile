@@ -28,7 +28,6 @@ LIBSVGTINY_SRCS = $(wildcard libsvgtiny/src/*c)
 OBJS = $(APPS_SRCS:.c=.o) \
 		$(BACKEND_SRCS:.c=.o) \
 		$(STDLIB_SRCS:.c=.o) \
-		$(STDIO_SRCS:.c=.o) \
 		$(STARTUP_SRCS:.c=.o) \
 		$(SYSCALL_SRCS:.c=.o) \
 		$(UGUI_SRCS:.c=.o) \
@@ -41,7 +40,6 @@ INCLUDES = -Icmsis \
 			-Ibackend \
 			-Istdlib/inc \
 			-Isyscalls \
-			-Istdio \
 			-IuGUI \
 			-Itwin/inc \
 			-Ilibsvgtiny/inc \
@@ -99,9 +97,9 @@ flash: $(PROJ_NAME.bin)
 		-c "reset run" -c shutdown 
 
 debug: $(PROJ_NAME).elf
+	cgdb -d arm-none-eabi-gdb -x "gdb.script"
 	# arm-none-eabi-gdb -x "gdb.script"
 	# Use CGDB
-	cgdb -d arm-none-eabi-gdb -x "gdb.script"
 
 clean:
 	rm -f $(OBJS)
