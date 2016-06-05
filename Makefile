@@ -17,7 +17,7 @@ SIZE = $(CROSS_COMPILE)size
 
 APPS_SRCS = $(wildcard apps/*.c)
 BACKEND_SRCS = $(wildcard backend/*.c)
-STDLIB_SRCS = $(wildcard stdlib/src/*.c)
+STDLIB_SRCS = $(wildcard STM32F4xx_StdPeriph_Driver/src/*.c)
 STDIO_SRCS = $(wildcard stdio/*.c)
 STARTUP_SRCS = $(wildcard cmsis_boot/*.c)
 SYSCALL_SRCS = $(wildcard syscalls/*.c)
@@ -38,7 +38,7 @@ INCLUDES = -Icmsis \
 			-Icmsis_boot \
 			-Iapps \
 			-Ibackend \
-			-Istdlib/inc \
+			-ISTM32F4xx_StdPeriph_Driver/inc \
 			-Isyscalls \
 			-IuGUI \
 			-Itwin/inc \
