@@ -599,69 +599,6 @@ ezxml_t ezxml_parse_str(char *s, size_t len)
     else return ezxml_err(root, d, "unclosed tag <%s>", root->cur->name);
 }
 
-// Wrapper for ezxml_parse_str() that accepts a file stream. Reads the entire
-// stream into memory and then parses it. For xml files, use ezxml_parse_file()
-// or ezxml_parse_fd()
-/* ezxml_t ezxml_parse_fp(FILE *fp) */
-/* { */
-/*     ezxml_root_t root; */
-/*     size_t l, len = 0; */
-/*     char *s; */
-/*  */
-/*     if (! (s = malloc(EZXML_BUFSIZE))) return NULL; */
-/*     do { */
-/*         len += (l = fread((s + len), 1, EZXML_BUFSIZE, fp)); */
-/*         if (l == EZXML_BUFSIZE) s = realloc(s, len + EZXML_BUFSIZE); */
-/*     } while (s && l == EZXML_BUFSIZE); */
-/*  */
-/*     if (! s) return NULL; */
-/*     root = (ezxml_root_t)ezxml_parse_str(s, len); */
-/*     root->len = -1; // so we know to free s in ezxml_free() */
-/*     return &root->xml; */
-/* } */
-
-// A wrapper for ezxml_parse_str() that accepts a file descriptor. First
-// attempts to mem map the file. Failing that, reads the file into memory.
-// Returns NULL on failure.
-/* ezxml_t ezxml_parse_fd(int fd) */
-/* { */
-/*     ezxml_root_t root; */
-/*     struct stat st; */
-/*     size_t l; */
-/*     void *m; */
-/*  */
-/*     if (fd < 0) return NULL; */
-/*     fstat(fd, &st); */
-/*  */
-/* #ifndef EZXML_NOMMAP */
-/*     l = (st.st_size + sysconf(_SC_PAGESIZE) - 1) & ~(sysconf(_SC_PAGESIZE) -1); */
-/*     if ((m = mmap(NULL, l, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0)) != */
-/*         MAP_FAILED) { */
-/*         madvise(m, l, MADV_SEQUENTIAL); // optimize for sequential access */
-/*         root = (ezxml_root_t)ezxml_parse_str(m, st.st_size); */
-/*         madvise(m, root->len = l, MADV_NORMAL); // put it back to normal */
-/*     } */
-/*     else { // mmap failed, read file into memory */
-/* #endif // EZXML_NOMMAP */
-/*         l = read(fd, m = malloc(st.st_size), st.st_size); */
-/*         root = (ezxml_root_t)ezxml_parse_str(m, l); */
-/*         root->len = -1; // so we know to free s in ezxml_free() */
-/* #ifndef EZXML_NOMMAP */
-/*     } */
-/* #endif // EZXML_NOMMAP */
-/*     return &root->xml; */
-/* } */
-
-// a wrapper for ezxml_parse_fd that accepts a file name
-/* ezxml_t ezxml_parse_file(const char *file) */
-/* { */
-/*     int fd = open(file, O_RDONLY, 0); */
-/*     ezxml_t xml = ezxml_parse_fd(fd); */
-/*      */
-/*     if (fd >= 0) close(fd); */
-/*     return xml; */
-/* } */
-
 // Encodes ampersand sequences appending the results to *dst, reallocating *dst
 // if length excedes max. a is non-zero for attribute encoding. Returns *dst
 char *ezxml_ampencode(const char *s, size_t len, char **dst, size_t *dlen,
@@ -738,46 +675,6 @@ char *ezxml_toxml_r(ezxml_t xml, char **s, size_t *len, size_t *max,
     while (txt[off] && off < xml->off) off++; // make sure off is within bounds
     return (xml->ordered) ? ezxml_toxml_r(xml->ordered, s, len, max, off, attr)
                           : ezxml_ampencode(txt + off, -1, s, len, max, 0);
-}
-
-// Converts an ezxml structure back to xml. Returns a string of xml data that
-// must be freed.
-char *ezxml_toxml(ezxml_t xml)
-{
-    ezxml_t p = (xml) ? xml->parent : NULL, o = (xml) ? xml->ordered : NULL;
-    ezxml_root_t root = (ezxml_root_t)xml;
-    size_t len = 0, max = EZXML_BUFSIZE;
-    char *s = strcpy(malloc(max), ""), *t, *n;
-    int i, j, k;
-
-    if (! xml || ! xml->name) return realloc(s, len + 1);
-    while (root->xml.parent) root = (ezxml_root_t)root->xml.parent; // root tag
-
-    for (i = 0; ! p && root->pi[i]; i++) { // pre-root processing instructions
-        for (k = 2; root->pi[i][k - 1]; k++);
-        for (j = 1; (n = root->pi[i][j]); j++) {
-            if (root->pi[i][k][j - 1] == '>') continue; // not pre-root
-            while (len + strlen(t = root->pi[i][0]) + strlen(n) + 7 > max)
-                s = realloc(s, max += EZXML_BUFSIZE);
-            len += sprintf(s + len, "<?%s%s%s?>\n", t, *n ? " " : "", n);
-        }
-    }
-
-    xml->parent = xml->ordered = NULL;
-    s = ezxml_toxml_r(xml, &s, &len, &max, 0, root->attr);
-    xml->parent = p;
-    xml->ordered = o;
-
-    for (i = 0; ! p && root->pi[i]; i++) { // post-root processing instructions
-        for (k = 2; root->pi[i][k - 1]; k++);
-        for (j = 1; (n = root->pi[i][j]); j++) {
-            if (root->pi[i][k][j - 1] == '<') continue; // not post-root
-            while (len + strlen(t = root->pi[i][0]) + strlen(n) + 7 > max)
-                s = realloc(s, max += EZXML_BUFSIZE);
-            len += sprintf(s + len, "\n<?%s%s%s?>", t, *n ? " " : "", n);
-        }
-    }
-    return realloc(s, len + 1);
 }
 
 // free the memory allocated for the ezxml structure

@@ -95,19 +95,6 @@ struct ezxml {
 // pass in the copy. Returns NULL on failure.
 ezxml_t ezxml_parse_str(char *s, size_t len);
 
-// A wrapper for ezxml_parse_str() that accepts a file descriptor. First
-// attempts to mem map the file. Failing that, reads the file into memory.
-// Returns NULL on failure.
-// ezxml_t ezxml_parse_fd(int fd);
-
-// a wrapper for ezxml_parse_fd() that accepts a file name
-// ezxml_t ezxml_parse_file(const char *file);
-    
-// Wrapper for ezxml_parse_str() that accepts a file stream. Reads the entire
-// stream into memory and then parses it. For xml files, use ezxml_parse_file()
-// or ezxml_parse_fd()
-// ezxml_t ezxml_parse_fp(FILE *fp);
-
 // returns the first child tag (one level deeper) with the given name or NULL
 // if not found
 ezxml_t ezxml_child(ezxml_t xml, const char *name);
@@ -136,10 +123,6 @@ const char *ezxml_attr(ezxml_t xml, const char *attr);
 // This retrieves the title of the 3rd book on the 1st shelf of library.
 // Returns NULL if not found.
 ezxml_t ezxml_get(ezxml_t xml, ...);
-
-// Converts an ezxml structure back to xml. Returns a string of xml data that
-// must be freed.
-char *ezxml_toxml(ezxml_t xml);
 
 // returns a NULL terminated array of processing instructions for the given
 // target

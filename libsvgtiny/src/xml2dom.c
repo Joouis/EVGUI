@@ -43,7 +43,7 @@ dom_xml_parser *dom_xml_parser_create(void *dontCare1, void *dontCare2, MesgFunc
 
 dom_xml_error dom_xml_parser_parse_chunk(dom_xml_parser *parser, const uint8_t *data, size_t len) {
   assert(parser);
-  ezxml_t doc = ezxml_parse_str((const char *)data, len);
+  ezxml_t doc = ezxml_parse_str((char *)data, len);
   if (doc) {
 	doc->type = XML_DOCUMENT_NODE;
     parser->doc->node = doc;
