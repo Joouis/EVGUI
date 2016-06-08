@@ -40,7 +40,7 @@ struct svgtiny_parse_state {
 	/* paint attributes */
 	svgtiny_colour fill;
 	svgtiny_colour stroke;
-	int stroke_width;
+	float stroke_width;
 
 	/* gradients */
 	unsigned int linear_gradient_stop_count;
