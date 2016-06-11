@@ -5,8 +5,10 @@
 #define D(x) twin_double_to_fixed(x)
 #define TEXT_SIZE	9
 
-void render_path(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape *path)
+void render_path(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape *path, float scale)
 {
+	
+	// TODO: scale is not implement
 	unsigned int j;
 
 	for ( j = 0; j != path->path_length; ) {
@@ -38,21 +40,32 @@ void render_path(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape
 				j += 7;
 				break;
 			default:
+				printf("error");
 				j += 1;
 		}
-		if (path->fill != svgtiny_TRANSPARENT) {
-			twin_paint_path(dst, path->fill, svg_path);
-		}
-		if (path->stroke != svgtiny_TRANSPARENT) {
-			twin_path_set_cap_style (svg_path, TwinCapProjecting);
-			twin_paint_stroke (dst, path->stroke, svg_path, D(path->stroke_width));
-		}
+	}
+	if (path->fill != svgtiny_TRANSPARENT) {
+		twin_paint_path(dst, path->fill, svg_path);
+	}
+	if (path->stroke != svgtiny_TRANSPARENT) {
+		twin_path_set_cap_style (svg_path, TwinCapProjecting);
+		twin_paint_stroke (dst, path->stroke, svg_path, D(path->stroke_width));
 	}
 	twin_path_empty(svg_path);
 }
 
+void render_text(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape *path, float scale)
+{
+	twin_path_move (svg_path,
+			D(path->text_x),
+			D(path->text_y));
+	twin_path_utf8(svg_path, path->text);
+	twin_paint_path(dst, path->stroke, svg_path);
+	twin_path_empty(svg_path);
+}
+
 void
-twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, int h)
+twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, int h, float scale)
 {
     twin_window_t   *svg = twin_window_create (screen, TWIN_ARGB32,
 						TwinWindowApplication,
@@ -70,22 +83,18 @@ twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, in
 		svgtiny_code code = svgtiny_parse(diagram, test, strlen(test), "http://dontcare", 1000, 1000);
 		if (svgtiny_OK == code) {
 
-			/* Path config*/
 			twin_path_t *svg_path = twin_path_create();
-			twin_path_set_font_size(svg_path, D(TEXT_SIZE));
+			/* twin_path_set_font_size(svg_path, D(TEXT_SIZE)); */
 			
 			for (i = 0; i != diagram->shape_count; i++) {
 				if (diagram->shape[i].path){
-					render_path(svg->pixmap, svg_path, &diagram->shape[i]);
+					render_path(svg->pixmap, svg_path, &diagram->shape[i], scale);
 				}else if (diagram->shape[i].text) {
-					twin_path_move (svg_path,
-							D(diagram->shape[i].text_x),
-							D(diagram->shape[i].text_y));
-					twin_path_utf8(svg_path, diagram->shape[i].text);
-					twin_paint_path(svg->pixmap, diagram->shape[i].stroke, svg_path);
-					twin_path_empty(svg_path);
+					render_text(svg->pixmap, svg_path, &diagram->shape[i], scale);
 				}
 			}
+
+			twin_path_destroy(svg_path);
 		} else {
 			/* TODO: Show error message on the screen */
 			

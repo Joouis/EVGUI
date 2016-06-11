@@ -64,7 +64,7 @@ int main(void)
     twin_clock_start (tf->screen, "Clock", 0, 0, 240, 320);
 #endif
 #if 1
-	twin_svg_start (tf->screen, "screen", 0, 0, 240, 320);
+	twin_svg_start (tf->screen, "screen", 0, 0, 240, 320, 1.0);
 #endif
 
 	twin_fbdev_activate(tf);
