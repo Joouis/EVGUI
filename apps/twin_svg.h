@@ -3,7 +3,7 @@
 #ifndef _TWIN_SVG_H_
 #define _TWIN_SVG_H_
 
-void twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, int h, float scale);
+void twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, int h);
 
 static char test[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 "<!-- Created with Inkscape (http://www.inkscape.org/) -->"

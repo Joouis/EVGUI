@@ -5,10 +5,9 @@
 #define D(x) twin_double_to_fixed(x)
 #define TEXT_SIZE	9
 
-void render_path(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape *path, float scale)
+void render_path(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape *path)
 {
 	
-	// TODO: scale is not implement
 	unsigned int j;
 
 	for ( j = 0; j != path->path_length; ) {
@@ -54,7 +53,7 @@ void render_path(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape
 	twin_path_empty(svg_path);
 }
 
-void render_text(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape *path, float scale)
+void render_text(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape *path)
 {
 	twin_path_move (svg_path,
 			D(path->text_x),
@@ -65,7 +64,7 @@ void render_text(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape
 }
 
 void
-twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, int h, float scale)
+twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, int h)
 {
     twin_window_t   *svg = twin_window_create (screen, TWIN_ARGB32,
 						TwinWindowApplication,
@@ -80,7 +79,7 @@ twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, in
 
 	struct svgtiny_diagram *diagram = svgtiny_create();
 	if (diagram) {
-		svgtiny_code code = svgtiny_parse(diagram, test, strlen(test), "http://dontcare", 1000, 1000);
+		svgtiny_code code = svgtiny_parse(diagram, test, strlen(test), "http://dontcare", 240, 320);
 		if (svgtiny_OK == code) {
 
 			twin_path_t *svg_path = twin_path_create();
@@ -88,9 +87,9 @@ twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, in
 			
 			for (i = 0; i != diagram->shape_count; i++) {
 				if (diagram->shape[i].path){
-					render_path(svg->pixmap, svg_path, &diagram->shape[i], scale);
+					render_path(svg->pixmap, svg_path, &diagram->shape[i]);
 				}else if (diagram->shape[i].text) {
-					render_text(svg->pixmap, svg_path, &diagram->shape[i], scale);
+					render_text(svg->pixmap, svg_path, &diagram->shape[i]);
 				}
 			}
 
