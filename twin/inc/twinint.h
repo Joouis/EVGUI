@@ -401,8 +401,8 @@ struct _twin_work {
 
 struct _twin_file {
     twin_queue_t	queue;
-    int			file;
-    twin_file_op_t	ops;
+    // int			file;
+    // twin_file_op_t	ops;
     twin_file_proc_t	proc;
     void		*closure;
 };

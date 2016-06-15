@@ -221,7 +221,6 @@ struct _twin_screen {
     /*
      * mouse image (optional)
      */
-    twin_pixmap_t	*cursor;
     twin_coord_t	curs_hx;
     twin_coord_t	curs_hy;
     twin_coord_t	curs_x;
@@ -431,9 +430,7 @@ typedef enum _twin_file_op {
     TWIN_WRITE = 2
 } twin_file_op_t;
 
-typedef twin_bool_t (*twin_file_proc_t) (int		file,
-					 twin_file_op_t	ops,
-					 void		*closure);
+typedef twin_bool_t (*twin_file_proc_t) (void	*closure);
 					    
 #define twin_time_compare(a,op,b)	(((a) - (b)) op 0)
 
@@ -630,18 +627,16 @@ twin_premultiply_alpha (twin_pixmap_t *px);
 void
 twin_event_enqueue (const twin_event_t *event);
 
-// #<{(|
-//  * twin_file.c
-//  |)}>#
-//  
-// twin_file_t *
-// twin_set_file (twin_file_proc_t	    file_proc,
-// 	       int		    file,
-// 	       twin_file_op_t	    ops,
-// 	       void		    *closure);
-//
-// void
-// twin_clear_file (twin_file_t *file);
+/*
+ * twin_file.c
+ */
+
+twin_file_t *
+twin_set_file (twin_file_proc_t	    file_proc,
+	       void		    *closure);
+
+void
+twin_clear_file (twin_file_t *file);
 
 /*
  * twin_fixed.c
@@ -1062,10 +1057,6 @@ twin_screen_set_background (twin_screen_t *screen, twin_pixmap_t *pixmap);
 
 twin_pixmap_t *
 twin_screen_get_background (twin_screen_t *screen);
-
-void
-twin_screen_set_cursor (twin_screen_t *screen, twin_pixmap_t *pixmap,
-			twin_fixed_t hotspot_x, twin_fixed_t hotspot_y);
 
 twin_bool_t
 twin_screen_dispatch (twin_screen_t *screen,

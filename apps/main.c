@@ -14,8 +14,8 @@ int main(void)
 	}
 	/* twin_screen_set_background (tf->screen, twin_make_pattern ()); */
 
-#if 0
-	twin_calc_start(tf->screen, "Calculator", 0, 0, 60*3/2, 120*3/2);
+#if 1
+	twin_calc_start(tf->screen, "Calculator", 0, 0, 240, 320);
 #endif
 #if 0
     twin_text_start (tf->screen,  "Gettysburg Address", 0, 0, 240, 320);
@@ -23,7 +23,7 @@ int main(void)
 #if 0
     twin_clock_start (tf->screen, "Clock", 0, 0, 240, 320);
 #endif
-#if 1
+#if 0
 	twin_svg_start (tf->screen, "screen", 0, 0, 240, 320);
 #endif
 

@@ -29,6 +29,11 @@
 
 extern u32 ltdc_work_layer;
 
+typedef struct _fb_event {
+	struct _fb_event *next;
+	twin_event_t *event;
+} fb_event;
+
 typedef struct _twin_fbdev{
 	twin_screen_t *screen;	/* twin screen */
 	uint16_t xres;

@@ -17,6 +17,12 @@ struct tm t = {
 	.tm_isdst = 0,
 };
 
+/* TouchPanel Data Structure*/
+static TP_STATE* TP_State;
+fb_event *TP_Head;
+fb_event *TP_End;
+static size_t FirstTouch = 1;
+
 /* GUI structure */
 UG_GUI gui;
 
@@ -114,7 +120,7 @@ static void _twin_fbdev_put_span (twin_coord_t left,
 void SysTick_Handler(void)
 {
    tv.tv_msec++;
-   /* TODO: min, hour, mon, year, ...  */
+   /* TODO: mon, year, ...  */
    if ( tv.tv_msec > 1000  ) {
 	   tv.tv_msec = 0;
 	   tv.tv_sec++;
@@ -122,8 +128,69 @@ void SysTick_Handler(void)
 	   if ( t.tm_sec == 60 ) {
 		   t.tm_sec = 0;
 		   t.tm_min++;
+		   if ( t.tm_min == 60 ) {
+			   t.tm_min = 0;
+			   t.tm_hour++;
+		   }
 	   }
    }
+
+   // Maybe too many works in ISR.
+   // Another solution is adding every TP_State into list.
+   // But it will consume more and more memory as time goes by!
+   /* char HavePressed = 0; */
+   /* TP_State = IOE_TP_GetState(); */
+   /* if ( TP_State->TouchDetected ) { */
+	/*    if ( (TP_State->X > 0) && (TP_State->X < 239 ) )  */
+	/*    {   */
+	/* 	   if ( (TP_State->Y > 0) && (TP_State->Y < 319 ) )  */
+	/* 	   {    */
+	/* 		   if ( FirstTouch ) { */
+	/* 			   // FirstTouch, so move the pointer. */
+	/* 			   if ( !TP_End ) { */
+	/* 				   TP_End = sram_malloc(sizeof(fb_event)); */
+	/* 				   TP_End->event->kind = TwinEventMotion; */
+	/* 				   TP_End->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
+	/* 				   TP_End->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
+	/* 			   }else { */
+	/* 				   TP_End->next = sram_malloc(sizeof(fb_event)); */
+	/* 				   TP_End->next->event->kind = TwinEventMotion; */
+	/* 				   TP_End->next->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
+	/* 				   TP_End->next->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
+	/* 				   TP_End = TP_End->next; */
+	/* 			   } */
+	/* 			   // Then add button down node. */
+	/* 			   TP_End->next = sram_malloc(sizeof(fb_event)); */
+	/* 			   TP_End->next->event->kind = TwinEventButtonDown; */
+	/* 			   TP_End->next->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
+	/* 			   TP_End->next->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
+	/* 			   TP_End = TP_End->next; */
+   /*  */
+	/* 			   // Clear the flag. */
+	/* 			   FirstTouch = 0; */
+	/* 		   }else { */
+	/* 			   // TODO: Concurrency issue? */
+	/* 			   TP_End->next = sram_malloc(sizeof(fb_event)); */
+	/* 			   TP_End->next->event->kind = TwinEventButtonDown; */
+	/* 			   TP_End->next->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
+	/* 			   TP_End->next->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
+	/* 			   TP_End = TP_End->next; */
+   /*  */
+	/* 			   HavePressed = 1; */
+	/* 		   } */
+	/* 	   } */
+	/*    } */
+   /* }else{ */
+	/*    FirstTouch = 1; */
+	/*    if ( HavePressed ) { */
+	/* 	   TP_End->next = sram_malloc(sizeof(fb_event)); */
+	/* 	   TP_End->next->event->kind = TwinEventButtonUp; */
+	/* 	   TP_End->next->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
+	/* 	   TP_End->next->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
+	/* 	   TP_End = TP_End->next; */
+	/* 	   HavePressed = 0; */
+	/*    } */
+   /* } */
 }
 
 void systick_init( void )
@@ -213,6 +280,20 @@ static void twin_fbdev_damaged(void *closure)
 }
 #endif /* _IMMEDIATE_REFRESH */
 
+static twin_bool_t
+twin_fbdev_read_events (void *closure)
+{
+	twin_fbdev_t *tf = closure;
+	fb_event *tmp;
+	while ( TP_Head->next ) {
+		twin_screen_dispatch(tf->screen, TP_Head->next->event);
+		tmp = TP_Head->next;
+		TP_Head->next = TP_Head->next->next;
+		sram_free(tmp);
+	}
+	return TWIN_TRUE;
+}
+
 twin_fbdev_t *twin_fbdev_create(void){
 	backend_init();
 	
@@ -226,6 +307,16 @@ twin_fbdev_t *twin_fbdev_create(void){
 	}
 
 	twin_set_work(twin_fbdev_work, TWIN_WORK_REDISPLAY, tf);
+	
+	char handle_events = 1;
+	if ( handle_events ) {
+		TP_Head = sram_malloc(sizeof(fb_event));
+		if ( TP_Head  ) {
+			TP_End = TP_Head->next;
+
+			twin_set_file(twin_fbdev_read_events, tf);
+		}
+	} 
 
 #ifdef _IMMEDIATE_REFRESH
 	twin_screen_register_damaged(tf->screen, twin_fbdev_damaged, tf);
