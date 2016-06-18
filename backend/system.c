@@ -22,6 +22,7 @@ static TP_STATE* TP_State;
 fb_event *TP_Head;
 fb_event *TP_End;
 static size_t FirstTouch = 1;
+static size_t HavePressed = 0;
 
 /* GUI structure */
 UG_GUI gui;
@@ -121,14 +122,14 @@ void SysTick_Handler(void)
 {
    tv.tv_msec++;
    /* TODO: mon, year, ...  */
-   if ( tv.tv_msec > 1000  ) {
+   if ( 100 == tv.tv_msec ) {
 	   tv.tv_msec = 0;
 	   tv.tv_sec++;
 	   t.tm_sec++;
-	   if ( t.tm_sec == 60 ) {
+	   if ( 60 == t.tm_sec) {
 		   t.tm_sec = 0;
 		   t.tm_min++;
-		   if ( t.tm_min == 60 ) {
+		   if ( 60 == t.tm_min ) {
 			   t.tm_min = 0;
 			   t.tm_hour++;
 		   }
@@ -138,66 +139,74 @@ void SysTick_Handler(void)
    // Maybe too many works in ISR.
    // Another solution is adding every TP_State into list.
    // But it will consume more and more memory as time goes by!
-   /* char HavePressed = 0; */
-   /* TP_State = IOE_TP_GetState(); */
-   /* if ( TP_State->TouchDetected ) { */
-	/*    if ( (TP_State->X > 0) && (TP_State->X < 239 ) )  */
-	/*    {   */
-	/* 	   if ( (TP_State->Y > 0) && (TP_State->Y < 319 ) )  */
-	/* 	   {    */
-	/* 		   if ( FirstTouch ) { */
-	/* 			   // FirstTouch, so move the pointer. */
-	/* 			   if ( !TP_End ) { */
-	/* 				   TP_End = sram_malloc(sizeof(fb_event)); */
-	/* 				   TP_End->event->kind = TwinEventMotion; */
-	/* 				   TP_End->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
-	/* 				   TP_End->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
-	/* 			   }else { */
-	/* 				   TP_End->next = sram_malloc(sizeof(fb_event)); */
-	/* 				   TP_End->next->event->kind = TwinEventMotion; */
-	/* 				   TP_End->next->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
-	/* 				   TP_End->next->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
-	/* 				   TP_End = TP_End->next; */
-	/* 			   } */
-	/* 			   // Then add button down node. */
-	/* 			   TP_End->next = sram_malloc(sizeof(fb_event)); */
-	/* 			   TP_End->next->event->kind = TwinEventButtonDown; */
-	/* 			   TP_End->next->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
-	/* 			   TP_End->next->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
-	/* 			   TP_End = TP_End->next; */
-   /*  */
-	/* 			   // Clear the flag. */
-	/* 			   FirstTouch = 0; */
-	/* 		   }else { */
-	/* 			   // TODO: Concurrency issue? */
-	/* 			   TP_End->next = sram_malloc(sizeof(fb_event)); */
-	/* 			   TP_End->next->event->kind = TwinEventButtonDown; */
-	/* 			   TP_End->next->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
-	/* 			   TP_End->next->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
-	/* 			   TP_End = TP_End->next; */
-   /*  */
-	/* 			   HavePressed = 1; */
-	/* 		   } */
-	/* 	   } */
-	/*    } */
-   /* }else{ */
-	/*    FirstTouch = 1; */
-	/*    if ( HavePressed ) { */
-	/* 	   TP_End->next = sram_malloc(sizeof(fb_event)); */
-	/* 	   TP_End->next->event->kind = TwinEventButtonUp; */
-	/* 	   TP_End->next->event->u.pointer.x = TP_End->next->event->u.pointer.screen_x = TP_State->X; */
-	/* 	   TP_End->next->event->u.pointer.y = TP_End->next->event->u.pointer.screen_y = TP_State->Y; */
-	/* 	   TP_End = TP_End->next; */
-	/* 	   HavePressed = 0; */
-	/*    } */
-   /* } */
+   TP_State = IOE_TP_GetState();
+   if ( TP_State->TouchDetected ) {
+	   if ( (TP_State->X > 0) && (TP_State->X < 239 ) ) 
+	   {  
+		   if ( (TP_State->Y > 0) && (TP_State->Y < 319 ) )
+		   {   
+			   if ( FirstTouch ) {
+				   // FirstTouch, so move the pointer.
+				   if ( !TP_End ) {
+					   TP_End = malloc(sizeof(fb_event));
+					   if ( TP_End->next ) {
+						   TP_End->event->kind = TwinEventMotion;
+						   TP_End->event->u.pointer.x = TP_State->X;
+						   TP_End->event->u.pointer.y = TP_State->Y;
+					   }
+				   }else {
+					   TP_End->next = malloc(sizeof(fb_event));
+					   if ( TP_End->next ) {
+						   TP_End->next->event->kind = TwinEventMotion;
+						   TP_End->next->event->u.pointer.x = TP_State->X;
+						   TP_End->next->event->u.pointer.y = TP_State->Y;
+						   TP_End = TP_End->next;
+					   }
+				   }
+				   // Then add button down node.
+				   TP_End->next = malloc(sizeof(fb_event));
+				   if ( TP_End->next ) {
+					   TP_End->next->event->kind = TwinEventButtonDown;
+					   TP_End->next->event->u.pointer.x = TP_State->X;
+					   TP_End->next->event->u.pointer.y = TP_State->Y;
+					   TP_End = TP_End->next;
+				   }
+
+				   // Clear the flag.
+				   FirstTouch = 0;
+			   }else {
+				   // TODO: Concurrency issue?
+				   TP_End->next = malloc(sizeof(fb_event));
+				   if ( TP_End->next ) {
+					   TP_End->next->event->kind = TwinEventButtonDown;
+					   TP_End->next->event->u.pointer.x = TP_State->X;
+					   TP_End->next->event->u.pointer.y = TP_State->Y;
+					   TP_End = TP_End->next;
+				   }
+			   }
+			   HavePressed = 1;
+		   }
+	   }
+   }else{
+	   FirstTouch = 1;
+	   if ( HavePressed ) {
+		   TP_End->next = malloc(sizeof(fb_event));
+		   if ( TP_End->next ) {
+			   TP_End->next->event->kind = TwinEventButtonUp;
+			   TP_End->next->event->u.pointer.x = TP_State->X;
+			   TP_End->next->event->u.pointer.y = TP_State->Y;
+			   TP_End = TP_End->next;
+		   }
+		   HavePressed = 0;
+	   }
+   }
 }
 
 void systick_init( void )
 {
    /* Init SysTick (1000Hz) */
    SystemCoreClockUpdate();
-   if (SysTick_Config(SystemCoreClock / 1000))
+   if (SysTick_Config(SystemCoreClock / 100))
    {
       /* Capture error */
       while (1);
@@ -286,10 +295,12 @@ twin_fbdev_read_events (void *closure)
 	twin_fbdev_t *tf = closure;
 	fb_event *tmp;
 	while ( TP_Head->next ) {
+		TP_Head->next->event->u.pointer.screen_x = TP_Head->next->event->u.pointer.x;
+		TP_Head->next->event->u.pointer.screen_y = TP_Head->next->event->u.pointer.y;
 		twin_screen_dispatch(tf->screen, TP_Head->next->event);
 		tmp = TP_Head->next;
 		TP_Head->next = TP_Head->next->next;
-		sram_free(tmp);
+		free(tmp);
 	}
 	return TWIN_TRUE;
 }
