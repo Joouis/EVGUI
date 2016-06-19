@@ -5,6 +5,8 @@
 #define D(x) twin_double_to_fixed(x)
 #define TEXT_SIZE	9
 
+twin_window_t  *index_page;
+
 void render_path(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape *path)
 {
 	
@@ -66,16 +68,15 @@ void render_text(twin_pixmap_t *dst, twin_path_t *svg_path, struct svgtiny_shape
 void
 twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, int h)
 {
-    twin_window_t   *svg = twin_window_create (screen, TWIN_ARGB32,
+    index_page = twin_window_create (screen, TWIN_ARGB32,
 						TwinWindowApplication,
 						x,y,w,h);
 	unsigned int i;
 
-    /* twin_window_set_name(svg, name); */
-    twin_fill (svg->pixmap, 0xffffffff, TWIN_SOURCE,
+    twin_fill (index_page->pixmap, 0xffffffff, TWIN_SOURCE,
 	       0, 0,
-	       svg->client.right - svg->client.left,
-	       svg->client.bottom - svg->client.top);
+	       index_page->client.right - index_page->client.left,
+	       index_page->client.bottom - index_page->client.top);
 
 	struct svgtiny_diagram *diagram = svgtiny_create();
 	if (diagram) {
@@ -87,9 +88,9 @@ twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, in
 			
 			for (i = 0; i != diagram->shape_count; i++) {
 				if (diagram->shape[i].path){
-					render_path(svg->pixmap, svg_path, &diagram->shape[i]);
+					render_path(index_page->pixmap, svg_path, &diagram->shape[i]);
 				}else if (diagram->shape[i].text) {
-					render_text(svg->pixmap, svg_path, &diagram->shape[i]);
+					render_text(index_page->pixmap, svg_path, &diagram->shape[i]);
 				}
 			}
 
@@ -114,7 +115,7 @@ twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, in
 			{
 				twin_path_move (path, fx, fy);
 				twin_path_utf8 (path, *l);
-				twin_paint_path (svg->pixmap, 0xff000000, path);
+				twin_paint_path (index_page->pixmap, 0xff000000, path);
 				twin_path_empty (path);
 				fy += D(TEXT_SIZE);
 			}
@@ -122,5 +123,5 @@ twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, in
 		svgtiny_free(diagram);
 	}
 
-	twin_window_show(svg);
+	twin_window_show(index_page);
 }

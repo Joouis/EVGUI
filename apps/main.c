@@ -23,7 +23,7 @@ int main(void)
 #if 1
     twin_clock_start (tf->screen, "Clock", 0, 0, 240, 320);
 #endif
-#if 0
+#if 1
 	twin_svg_start (tf->screen, "screen", 0, 0, 240, 320);
 #endif
 

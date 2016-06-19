@@ -20,9 +20,6 @@ struct tm t = {
 /* GUI structure */
 UG_GUI gui;
 
-/* Touch structure */
-static TP_STATE* TP_State;
-
 /* Hardware accelerator for UG_DrawLine (Platform: STM32F4x9) */
 UG_RESULT _HW_DrawLine( UG_S16 x1, UG_S16 y1, UG_S16 x2, UG_S16 y2, UG_COLOR c )
 {
@@ -125,17 +122,6 @@ void SysTick_Handler(void)
 	   if ( 60 == t.tm_sec ) {
 		   t.tm_sec = 0;
 		   t.tm_min++;
-	   }
-   }
-
-   TP_State = IOE_TP_GetState();
-   if( TP_State->TouchDetected )
-   {
-	   if ( (TP_State->X > 0) && (TP_State->X < 239 ) )
-	   {
-		   if ( (TP_State->Y > 0) && (TP_State->Y < 319 ) )
-		   {
-		   }
 	   }
    }
 }
