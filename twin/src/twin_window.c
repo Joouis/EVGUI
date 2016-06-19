@@ -33,7 +33,8 @@ twin_window_create (twin_screen_t	*screen,
     switch (window->style) {
     case TwinWindowApplication:
 	left = TWIN_BW;
-	top = TWIN_BW + TWIN_TITLE_HEIGHT + TWIN_BW;
+	/* top = TWIN_BW + TWIN_TITLE_HEIGHT + TWIN_BW; */
+	top = TWIN_BW;
 	right = TWIN_BW + TWIN_RESIZE_SIZE;
 	bottom = TWIN_BW + TWIN_RESIZE_SIZE;
 	break;
