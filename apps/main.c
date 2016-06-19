@@ -20,10 +20,10 @@ int main(void)
 #if 0
     twin_text_start (tf->screen,  "Gettysburg Address", 0, 0, 240, 320);
 #endif
-#if 0
+#if 1
     twin_clock_start (tf->screen, "Clock", 0, 0, 240, 320);
 #endif
-#if 1
+#if 0
 	twin_svg_start (tf->screen, "screen", 0, 0, 240, 320);
 #endif
 

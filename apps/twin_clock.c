@@ -170,24 +170,17 @@ extern struct tm t;
 static twin_time_t
 _twin_clock_interval (void)
 {
-    /* struct timeval  tv; */
-    /* gettimeofday (&tv, NULL); */
-	
-    return 1000 - tv.tv_msec;
+    return 100 - tv.tv_msec;
 }
 
 void
 _twin_clock_paint (twin_clock_t *clock)
 {
     twin_angle_t    second_angle, minute_angle, hour_angle;
-    
-    /* gettimeofday (&tv, NULL); */
-    /* localtime_r(&tv.tv_sec, &t); */
 
     _twin_clock_face (clock);
 
-    second_angle = ((t.tm_sec * 100 + tv.tv_msec / 10000) *
-		    TWIN_ANGLE_360) / 6000;
+    second_angle = ((t.tm_sec * 100) * TWIN_ANGLE_360) / 6000;
     minute_angle = twin_clock_minute_angle (t.tm_min) + second_angle / 60;
     hour_angle = (t.tm_hour * TWIN_ANGLE_360 + minute_angle) / 12;
     twin_clock_hand (clock, hour_angle, D(0.4), D(0.07), D(0.01),
