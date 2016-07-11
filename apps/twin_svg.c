@@ -96,15 +96,11 @@ twin_svg_start (twin_screen_t *screen, const char *name, int x, int y, int w, in
 
 			twin_path_destroy(svg_path);
 		} else {
-			/* TODO: Show error message on the screen */
-			
 			twin_path_t *path = twin_path_create();
-			twin_path_set_font_size(path, D(TEXT_SIZE));
+			twin_path_set_font_size(path, D(20));
 			twin_fixed_t    fx, fy;
 			static const char	*lines[] = {
-				"Fourscore and seven years ago our fathers brought forth on",
-				"this continent a new nation, conceived in liberty and",
-				"dedicated to the proposition that all men are created equal.",
+				"SVG parse error!",
 				0
 			};
 			const char **l;
