@@ -103,5 +103,5 @@ extern struct tm t;
 twin_time_t
 twin_now (void)
 {
-    return tv.tv_sec * 100 + tv.tv_msec;
+    return tv.tv_sec * 1000 + tv.tv_msec;
 }

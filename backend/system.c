@@ -115,7 +115,7 @@ void SysTick_Handler(void)
 {
    tv.tv_msec++;
    /* TODO: min, hour, mon, year, ...  */
-   if ( 100 == tv.tv_msec  ) {
+   if ( 1000 == tv.tv_msec  ) {
 	   tv.tv_msec = 0;
 	   tv.tv_sec++;
 	   t.tm_sec++;
@@ -128,9 +128,9 @@ void SysTick_Handler(void)
 
 void systick_init( void )
 {
-   /* Init SysTick (100Hz) */
+   /* Init SysTick (1000Hz) */
    SystemCoreClockUpdate();
-   if (SysTick_Config(SystemCoreClock / 100))
+   if (SysTick_Config(SystemCoreClock / 1000))
    {
       /* Capture error */
       while (1);
@@ -139,6 +139,12 @@ void systick_init( void )
 
 void backend_init(void)
 {
+
+	//Enable HSE clock
+	RCC_HSEConfig(RCC_HSE_ON);
+	//Wait for clock to stabilize
+	while (!RCC_WaitForHSEStartUp());
+
 	SystemInit();
 	delay_init();
 	sdram_init();
@@ -151,7 +157,7 @@ void backend_init(void)
    /* Init Touch */
    IOE_Config();
 
-   /* Init SysTick (100Hz) */
+   /* Init SysTick (1000Hz) */
    systick_init();
    
    /* Register hardware acceleration */

@@ -170,7 +170,7 @@ extern struct tm t;
 static twin_time_t
 _twin_clock_interval (void)
 {
-    return 100 - tv.tv_msec;
+    return 1000 - tv.tv_msec;
 }
 
 void
